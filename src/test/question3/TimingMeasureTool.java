@@ -16,7 +16,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 /**
- *
+ * search a Class 
+ * output the cost time of each function
+ * to console and a file.
  * @author michaelzhang
  */
 public class TimingMeasureTool {
@@ -26,79 +28,31 @@ public class TimingMeasureTool {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        String filepath;
+        TimingMeasureTool tmt = new TimingMeasureTool();
+       
         String outputFilepath;
+        Class myClass = null;
         try {
-            if(args.length > 0)
-                filepath = TimingMeasureTool.class.getResource("/").getFile() + "test/question3/"+ args[0];
-            else filepath = TimingMeasureTool.class.getResource("/").getFile() + "test/question3/MyTestClass";
+            myClass = tmt.getTestClass(args);
+            String className = myClass.getName();
+            System.out.println(className);
             
             if(args.length > 1)
                 outputFilepath = TimingMeasureTool.class.getResource("/").getFile() + "test/question3/"+ args[1];
             else outputFilepath = TimingMeasureTool.class.getResource("/").getFile() + "test/question3/testoutput.txt";
-      
-            File file = new File(filepath);
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
-           
+            
             File outfile = new File(outputFilepath);
             BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(outfile));
-           
-            String str = null;
-            bufferedReader.readLine();//ignore first line comment
-            str = bufferedReader.readLine();//read class name
-            
-            Class myClass;
-            if(args.length == 0)
-                myClass = Class.forName("test.question3.MyTestClass");
-            else
-                myClass = Class.forName(str);
-            
-            String className = myClass.getName();
-            System.out.println(className);
-            
-            /*while((str=bufferedReader.readLine())!=null){
-               
-                 //bufferedWriter.write(str);
-                 //bufferedWriter.newLine();//return
-               
-           }*/
-           bufferedReader.close();
+           //bufferedReader.close();
            //bufferedWriter.close();
             
             Constructor  constructor = myClass.getConstructor(int.class);
             MyTestClass myObject = (MyTestClass)constructor.newInstance(1);
-            ArrayList al = new ArrayList();
-            
-            //Method [] methods = myClass.getMethods();
-            Method [] methods = MyTestClass.class.getDeclaredMethods();
+    
+            Method  []  methods = myClass.getDeclaredMethods();
             for(Method m : methods){
-                System.out.println("method = " + m.getName()+" "+m.getParameterCount()+" ");
-                m.setAccessible(true);
-                Class []  pType = m.getParameterTypes();
-                int index=0;
-                for(Class c: pType){
-                    //System.out.println("para type " + c.getName());
-                    if(c.getName().equalsIgnoreCase("int"))
-                        al.add(index,1);                   
-                    else if(c.getName().equalsIgnoreCase("long"))                 
-                        al.add(index,1l);
-                    else if(c.getName().equalsIgnoreCase("string"))
-                        al.add(index,"a string");
-                    index++;
-                }
-                
-                int count = 0;
-                count = m.getParameterCount();
-                Object a[] = new Object[count];
-                al.toArray(a);
-                long start = System.currentTimeMillis();              
-                if(1 == count)
-                    m.invoke(myObject, a[0]);
-                else if(2 == count)
-                    m.invoke(myObject,1,1);
-                else if(0 == count)
-                    m.invoke(myObject, null);
-                String str1 = "Method: " + "\""+ m.getName()+ "\" "+" cost time is " + (System.currentTimeMillis()-start) + " ms.";
+                long t = tmt.getMethodCostTime(myObject, m);
+                String str1 = "Method: " + "\""+ m.getName()+ "\" " + " cost time is " + t + " ms.";
                 System.out.println(str1);
                 bufferedWriter.write(str1);
                 bufferedWriter.newLine();//return
@@ -114,6 +68,76 @@ public class TimingMeasureTool {
         catch(Exception e){
             e.printStackTrace();
         }
+    }
+    /**
+     * return a test class
+     * @param args if length = 0, use MyTestClass, else open file in args[0]
+     * @return a generated Class
+     * @throws Exception 
+     */
+    public Class getTestClass(String args[]) throws Exception
+    {
+        Class myClass = null;       
+        String filepath;
+        
+        if(args.length > 0)
+            filepath = TimingMeasureTool.class.getResource("/").getFile() + "test/question3/"+ args[0];
+        else filepath = TimingMeasureTool.class.getResource("/").getFile() + "test/question3/MyTestClass";
+                      
+        File file = new File(filepath);
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+                     
+        String str = null;
+        bufferedReader.readLine();//ignore first line comment
+        str = bufferedReader.readLine();//read class name
+            
+            
+        if(args.length == 0)
+            myClass = Class.forName("test.question3.MyTestClass");
+        else
+            myClass = Class.forName(str);
+        bufferedReader.close();
+        
+        return myClass;
+    }
+    /**
+     * return a function cost time in milliseconds
+     * @param myObject
+     * @param m
+     * @return 
+     * @throws Exception 
+     */
+    public long getMethodCostTime(Object myObject, Method m) throws Exception//throws IllegalAccessException
+    {
+        ArrayList al = new ArrayList();
+        
+         m.setAccessible(true);
+         Class []  pType = m.getParameterTypes();
+         int index=0;
+         for(Class c: pType){
+          //System.out.println("para type " + c.getName());
+         if(c.getName().equalsIgnoreCase("int"))
+            al.add(index,1);                   
+         else if(c.getName().equalsIgnoreCase("long"))                 
+            al.add(index,1l);
+         else if(c.getName().equalsIgnoreCase("string"))
+            al.add(index,"a string");
+            index++;
+         }
+                
+         int count = 0;
+         count = m.getParameterCount();
+         Object a[] = new Object[count];
+         al.toArray(a);
+         long start = System.currentTimeMillis();              
+         if(1 == count)
+             m.invoke(myObject, a[0]);
+         else if(2 == count)
+             m.invoke(myObject,1,1);
+         else if(0 == count)
+             m.invoke(myObject, null);
+         
+        return System.currentTimeMillis() - start;
     }
     
 }
