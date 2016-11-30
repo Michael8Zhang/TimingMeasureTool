@@ -69,9 +69,11 @@ public class TimingMeasureTool {
             MyTestClass myObject = (MyTestClass)constructor.newInstance(1);
             ArrayList al = new ArrayList();
             
-            Method [] methods = myClass.getMethods();
+            //Method [] methods = myClass.getMethods();
+            Method [] methods = MyTestClass.class.getDeclaredMethods();
             for(Method m : methods){
-                //System.out.println("method = " + m.getName()+" "+m.getParameterCount()+" ");
+                System.out.println("method = " + m.getName()+" "+m.getParameterCount()+" ");
+                m.setAccessible(true);
                 Class []  pType = m.getParameterTypes();
                 int index=0;
                 for(Class c: pType){
@@ -84,19 +86,16 @@ public class TimingMeasureTool {
                         al.add(index,"a string");
                     index++;
                 }
-                long start = System.currentTimeMillis();
+                
                 int count = 0;
                 count = m.getParameterCount();
                 Object a[] = new Object[count];
                 al.toArray(a);
-                               
-                if(m.getName().equalsIgnoreCase("wait")||
-                        m.getName().equalsIgnoreCase("notify")||
-                        m.getName().equalsIgnoreCase("notifyAll")) continue;
+                long start = System.currentTimeMillis();              
                 if(1 == count)
                     m.invoke(myObject, a[0]);
                 else if(2 == count)
-                    m.invoke(myObject,a[0], a[1]);
+                    m.invoke(myObject,1,1);
                 else if(0 == count)
                     m.invoke(myObject, null);
                 String str1 = "Method: " + "\""+ m.getName()+ "\" "+" cost time is " + (System.currentTimeMillis()-start) + " ms.";
@@ -104,43 +103,7 @@ public class TimingMeasureTool {
                 bufferedWriter.write(str1);
                 bufferedWriter.newLine();//return
             }
-            
-            
-            
-            //Method privateM = MyTestClass.class.getDeclaredMethod("pri_increase", new Class[]{int.class,int.class});
-            Method [] privateM = MyTestClass.class.getDeclaredMethods();
-            for(Method m: privateM) {
-                m.setAccessible(true);
-                Class []  pType = m.getParameterTypes();
-                int index=0;
-                for(Class c: pType){
-                    System.out.println("para type " + c.getName());
-                    if(c.getName().equalsIgnoreCase("int"))
-                        al.add(index,1);                   
-                    else if(c.getName().equalsIgnoreCase("long"))                 
-                        al.add(index,1l);
-                    else if(c.getName().equalsIgnoreCase("string"))
-                        al.add(index,"a string");
-                    index++;
-                }
-                long start = System.currentTimeMillis();
-                int count = 0;
-                count = m.getParameterCount();
-                Object a[] = new Object[count];
-                al.toArray(a);
-                if(1 == count)
-                    m.invoke(myObject, a[0]);
-                else if(2 == count)
-                    m.invoke(myObject,a[0], a[1]);
-                else if(0 == count)
-                    m.invoke(myObject, null);
-                //m.invoke(myObject, 2,2);
-                System.out.println("Method: " + "\""+ m.getName()+ "\" "+" cost time is " + (System.currentTimeMillis()-start) + " ms.");
-            //Constructor const = MyClass.class.getConstructor(int.class);
-            //MyTestClass myTestClassR = (MyTestClass)constructor.newInstance(1);
-            //System.out.println(myTestClassR.count);
-            }
-            
+            bufferedWriter.close();
             
         }catch(FileNotFoundException e){
            System.out.println("File " + args[0] + " not exist !");          
