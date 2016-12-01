@@ -109,35 +109,45 @@ public class TimingMeasureTool {
      */
     public long getMethodCostTime(Object myObject, Method m) throws Exception//throws IllegalAccessException
     {
-        ArrayList al = new ArrayList();
+        ArrayList <String> al = new ArrayList();
         
-         m.setAccessible(true);
-         Class []  pType = m.getParameterTypes();
-         int index=0;
-         for(Class c: pType){
-          //System.out.println("para type " + c.getName());
-         if(c.getName().equalsIgnoreCase("int"))
-            al.add(index,1);                   
-         else if(c.getName().equalsIgnoreCase("long"))                 
-            al.add(index,1l);
-         else if(c.getName().equalsIgnoreCase("string"))
-            al.add(index,"a string");
-            index++;
-         }
-                
-         int count = 0;
-         count = m.getParameterCount();
-         Object a[] = new Object[count];
-         al.toArray(a);
-         long start = System.currentTimeMillis();              
-         if(1 == count)
-             m.invoke(myObject, a[0]);
-         else if(2 == count)
-             m.invoke(myObject,1,1);
-         else if(0 == count)
-             m.invoke(myObject, null);
+        m.setAccessible(true);
+        Class []  pType = m.getParameterTypes();
+  
+        for(Class c: pType){
+            al.add(c.getName());                           
+        }
+                        
+        long start = System.currentTimeMillis();           
+        invokeWraper(myObject, m, al);
          
         return System.currentTimeMillis() - start;
     }
-    
+    /**
+     * need improve
+     * @param myObject
+     * @param m
+     * @param al
+     * @throws Exception 
+     */
+    private void invokeWraper(Object myObject, Method m, ArrayList<String> al) throws Exception
+    {
+        int count = m.getParameterCount();
+        String strArray[] = new String[count];
+        al.toArray(strArray);
+        
+        if(1 == count) {
+            if(strArray[0].equalsIgnoreCase("int"))
+                m.invoke(myObject, 1);
+            else if(strArray[0].equalsIgnoreCase("String"))
+                m.invoke(myObject, "a string");
+        }
+        else if(2 == count) {
+             m.invoke(myObject,1,1);
+        }        
+        else if(0 == count) {
+             m.invoke(myObject, null);
+        }
+        
+    }
 }
