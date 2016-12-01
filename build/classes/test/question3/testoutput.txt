@@ -1,2 +1,2 @@
-Method: "pri_increase"  cost time is 101 ms.
+Method: "pri_increase"  cost time is 106 ms.
 Method: "increase"  cost time is 0 ms.

@@ -47,7 +47,7 @@ public class TimingMeasureTool {
            //bufferedWriter.close();
             
             Constructor  constructor = myClass.getConstructor(int.class);
-            MyTestClass myObject = (MyTestClass)constructor.newInstance(1);
+            Object myObject = constructor.newInstance(1);
     
             Method  []  methods = myClass.getDeclaredMethods();
             for(Method m : methods){
